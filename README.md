@@ -1,4 +1,4 @@
-# INS-GPS-EKF
+# INS-GPS-EKF (Error-State (Indirect) Extended Kalman Filter)
 
 A C++17 static library implementing a **15-dimensional Error-State Extended Kalman Filter** for fusing Inertial Navigation System (INS) data with GPS measurements. The filter estimates and corrects position, velocity, and orientation errors in real time, with optional GPS-derived azimuth alignment.
 
