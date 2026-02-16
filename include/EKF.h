@@ -23,13 +23,13 @@ class EKF {
   Eigen::Vector3d getVelocityState();
   Eigen::Matrix3d getOrientationState();
   double getAzimuth();
-  void setQMatrix(Eigen::MatrixXd Q);
-  void setRMatrix(Eigen::MatrixXd R);
+  void setQMatrix(const Eigen::MatrixXd &Q);
+  void setRMatrix(const Eigen::MatrixXd &R);
   void setInitialState(Eigen::Vector3d p_0, Eigen::Vector3d v_0, Eigen::Matrix3d T_0);
   void start();
 
  private:
-  Tracking *tracker_;
+  std::unique_ptr<Tracking> tracker_;
 
   Eigen::VectorXd fixed_error_state_, ins_error_state_, current_error_state_;
   Eigen::MatrixXd fixed_error_state_covariance_, ins_error_state_covariance_, current_state_covariance_;
@@ -42,7 +42,7 @@ class EKF {
 
   bool is_running_;
 
-  spdlog::logger *logger_;
+  std::unique_ptr<spdlog::logger> logger_;
   std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> console_sink_;
   std::shared_ptr<spdlog::sinks::rotating_file_sink_mt> file_sink_;
 

@@ -33,7 +33,7 @@ public:
 
  protected:
   void resetClock();
-  void setQMatrix(Eigen::MatrixXd Q);
+  void setQMatrix(const Eigen::MatrixXd &Q);
 
 private:
   void updateTrackingWithMeasurements(Eigen::Vector3d f_bi_b, Eigen::Vector3d omega_bi_b);
@@ -44,9 +44,9 @@ private:
   std::shared_ptr<EKF_INS::ErrorState> error_state_ptr_;
   std::shared_ptr<EKF_INS::ErrorStateCovariance> error_state_covariance_ptr_;
 
-  std::vector<Eigen::Vector3d> f_measurments_, g_measurments_;
+  std::vector<Eigen::Vector3d> f_measurements_, g_measurements_;
   std::chrono::duration<double> dt_;
-  std::chrono::_V2::system_clock::time_point clock_;
+  std::chrono::high_resolution_clock::time_point clock_;
 
   std::shared_ptr<spdlog::logger> logger_;
 

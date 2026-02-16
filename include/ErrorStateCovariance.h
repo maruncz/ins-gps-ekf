@@ -12,8 +12,8 @@ namespace EKF_INS {
 class ErrorStateCovariance {
  public:
   ErrorStateCovariance(std::shared_ptr<EKF_INS::ErrorState> error_state_ptr);
-  ErrorStateCovariance(std::shared_ptr<EKF_INS::ErrorState> error_state_ptr, Eigen::MatrixXd Q);
-  void setQMatrix(Eigen::MatrixXd Q);
+  ErrorStateCovariance(std::shared_ptr<EKF_INS::ErrorState> error_state_ptr, const Eigen::MatrixXd &Q);
+  void setQMatrix(const Eigen::MatrixXd &Q);
   void updateCovarianceMatrix(double dt);
   Eigen::MatrixXd getErrorStateCovariance();
   void resetPMatrix();

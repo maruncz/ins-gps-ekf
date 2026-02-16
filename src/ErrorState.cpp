@@ -74,7 +74,7 @@ void ErrorState::resetErrorState() {
 Eigen::Matrix3d ErrorState::Frr() {
   Eigen::Matrix3d Frr_ = Eigen::Matrix3d::Zero();
   Frr_(0, 2) = -v_n_(n) / std::pow(Utils::Rm(p_n_(phi)) + p_n_(h), 2);
-  Frr_(1, 0) = v_n_(e) * std::sin(p_n_(phi)) / (std::pow(std::cos(p_n_(phi)), 2) * (Utils::Rn(p_n_(phi) + p_n_(h))));
+  Frr_(1, 0) = v_n_(e) * std::sin(p_n_(phi)) / (std::pow(std::cos(p_n_(phi)), 2) * (Utils::Rn(p_n_(phi)) + p_n_(h)));
   Frr_(1, 2) = -v_n_(e) / (std::cos(p_n_(phi)) * std::pow(Utils::Rn(p_n_(phi)) + p_n_(h), 2));
 
   return Frr_;
@@ -135,7 +135,7 @@ Eigen::Matrix3d ErrorState::Fer() {
   Fer_(0, 0) = Utils::omega_ei * std::sin(p_n_(phi));
   Fer_(0, 2) = v_n_(e) / std::pow(Utils::Rn(p_n_(phi)) + p_n_(h), 2);
   Fer_(1, 2) = -v_n_(n) / std::pow(Utils::Rm(p_n_(phi)) + p_n_(h), 2);
-  Fer_(2, 0) = Utils::omega_ei * std::cos(p_n_(phi)) + v_n_(e) / ((Utils::Rn(p_n_(phi) + p_n_(h))) * std::pow(std::cos(p_n_(phi)), 2));
+  Fer_(2, 0) = Utils::omega_ei * std::cos(p_n_(phi)) + v_n_(e) / ((Utils::Rn(p_n_(phi)) + p_n_(h)) * std::pow(std::cos(p_n_(phi)), 2));
   Fer_(2, 2) = -v_n_(e) * std::tan(p_n_(phi)) / std::pow(Utils::Rn(p_n_(phi)) + p_n_(h), 2);
 
   return Fer_;

@@ -20,12 +20,12 @@ Tracking::Tracking(bool use_azimuth_alignment) : use_azimuth_alignment_(use_azim
 }
 
 void Tracking::updateTrackingWithAccelerometer(Eigen::Vector3d f_bi_b) {
-  f_measurments_.push_back(f_bi_b);
+  f_measurements_.push_back(f_bi_b);
   checkAndUpdate();
 }
 
 void Tracking::updateTrackingWithGyro(Eigen::Vector3d omega_bi_b) {
-  g_measurments_.push_back(omega_bi_b);
+  g_measurements_.push_back(omega_bi_b);
   checkAndUpdate();
 }
 
@@ -49,11 +49,11 @@ void Tracking::resetClock() {
 }
 
 void Tracking::checkAndUpdate() {
-  if (!f_measurments_.empty() && !g_measurments_.empty()) {
-    Eigen::Vector3d f_mean = Utils::calcMeanVector(f_measurments_);
-    Eigen::Vector3d g_mean = Utils::calcMeanVector(g_measurments_);
-    f_measurments_.clear();
-    g_measurments_.clear();
+  if (!f_measurements_.empty() && !g_measurements_.empty()) {
+    Eigen::Vector3d f_mean = Utils::calcMeanVector(f_measurements_);
+    Eigen::Vector3d g_mean = Utils::calcMeanVector(g_measurements_);
+    f_measurements_.clear();
+    g_measurements_.clear();
     updateDT();
     updateTrackingWithMeasurements(f_mean, g_mean);
     resetClock();
@@ -64,7 +64,7 @@ void Tracking::updateDT() {
   dt_ = std::chrono::high_resolution_clock::now() - clock_;
 }
 
-void Tracking::setQMatrix(Eigen::MatrixXd Q) {
+void Tracking::setQMatrix(const Eigen::MatrixXd &Q) {
   error_state_covariance_ptr_->setQMatrix(Q);
 }
 } // namespace EKF_INS

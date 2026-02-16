@@ -11,12 +11,12 @@ ErrorStateCovariance::ErrorStateCovariance(std::shared_ptr<EKF_INS::ErrorState> 
   Q_.setZero();
 }
 
-ErrorStateCovariance::ErrorStateCovariance(std::shared_ptr<EKF_INS::ErrorState> error_state_ptr, Eigen::MatrixXd Q) : ErrorStateCovariance(
+ErrorStateCovariance::ErrorStateCovariance(std::shared_ptr<EKF_INS::ErrorState> error_state_ptr, const Eigen::MatrixXd &Q) : ErrorStateCovariance(
     error_state_ptr) {
   setQMatrix(Q);
 }
 
-void ErrorStateCovariance::setQMatrix(Eigen::MatrixXd Q) { Q_ = Q; }
+void ErrorStateCovariance::setQMatrix(const Eigen::MatrixXd &Q) { Q_ = Q; }
 
 void ErrorStateCovariance::updateCovarianceMatrix(double dt) {
   Eigen::MatrixXd phi = error_state_ptr_->getTransitionMatrix(dt);

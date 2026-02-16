@@ -15,7 +15,7 @@ EKF::EKF() : Q_(15, 15), R_(6, 6), H_(6, 15), is_running_(false), use_azimuth_al
     file_sink_->set_level(spdlog::level::trace);
     file_sink_->set_pattern("%+");
 
-    logger_ = new spdlog::logger("ekf_ins_logger", {console_sink_, file_sink_});
+    logger_ = std::make_unique<spdlog::logger>("ekf_ins_logger", spdlog::sinks_init_list{console_sink_, file_sink_});
     logger_->set_level(spdlog::level::debug);
     logger_->flush_on(spdlog::level::debug);
 
@@ -24,7 +24,7 @@ EKF::EKF() : Q_(15, 15), R_(6, 6), H_(6, 15), is_running_(false), use_azimuth_al
   catch (const spdlog::spdlog_ex &ex) {
     std::cout << "Log initialization failed: " << ex.what() << std::endl;
   }
-  tracker_ = new EKF_INS::Tracking(use_azimuth_alignment_);
+  tracker_ = std::make_unique<EKF_INS::Tracking>(use_azimuth_alignment_);
 
   // Initializing default Q matrix
   Eigen::VectorXd q_diag(15);
@@ -64,11 +64,12 @@ void EKF::updateWithInertialMeasurement(Eigen::Vector3d data, EKF_INS::Type type
                 std::get<1>(ins_navigation_state_).transpose(),
                 EKF_INS::Utils::toEulerAngles(std::get<2>(ins_navigation_state_)).transpose());
   // Set the most update state to provide
-  state_mutex_.lock();
-  current_navigation_state_ = ins_navigation_state_;
-  current_error_state_ = ins_error_state_;
-  current_state_covariance_ = ins_error_state_covariance_;
-  state_mutex_.unlock();
+  {
+    std::lock_guard<std::mutex> lock(state_mutex_);
+    current_navigation_state_ = ins_navigation_state_;
+    current_error_state_ = ins_error_state_;
+    current_state_covariance_ = ins_error_state_covariance_;
+  }
 }
 
 void EKF::updateWithGPSMeasurements(std::vector<Eigen::Matrix<double, 6, 1>> gps_data) {
@@ -142,12 +143,13 @@ void EKF::updateWithGPSMeasurements(std::vector<Eigen::Matrix<double, 6, 1>> gps
                 std::get<1>(fixed_navigation_state_).transpose(),
                 EKF_INS::Utils::toEulerAngles(std::get<2>(fixed_navigation_state_)).transpose());
   // Set the most update state to provide
-  state_mutex_.lock();
-  current_navigation_state_ = fixed_navigation_state_;
-  current_error_state_ = fixed_error_state_;
-  current_state_covariance_ = fixed_error_state_covariance_;
-  azimuth_ = EKF_INS::Utils::toEulerAngles(std::get<2>(fixed_navigation_state_))(2);
-  state_mutex_.unlock();
+  {
+    std::lock_guard<std::mutex> lock(state_mutex_);
+    current_navigation_state_ = fixed_navigation_state_;
+    current_error_state_ = fixed_error_state_;
+    current_state_covariance_ = fixed_error_state_covariance_;
+    azimuth_ = EKF_INS::Utils::toEulerAngles(std::get<2>(fixed_navigation_state_))(2);
+  }
 }
 
 Eigen::VectorXd EKF::getErrorState() {
@@ -185,18 +187,19 @@ double EKF::getAzimuth() {
   return azimuth_;
 }
 
-void EKF::setQMatrix(Eigen::MatrixXd Q) {
+void EKF::setQMatrix(const Eigen::MatrixXd &Q) {
   Q_ = Q;
   tracker_->setQMatrix(Q_);
 }
 
-void EKF::setRMatrix(Eigen::MatrixXd R) { R_ = R; }
+void EKF::setRMatrix(const Eigen::MatrixXd &R) { R_ = R; }
 
 void EKF::setInitialState(Eigen::Vector3d p_0, Eigen::Vector3d v_0, Eigen::Matrix3d T_0) {
   tracker_->setNavigationInitialState(p_0, v_0, T_0);
-  state_mutex_.lock();
-  current_navigation_state_ = std::make_tuple(p_0, v_0, T_0);
-  state_mutex_.unlock();
+  {
+    std::lock_guard<std::mutex> lock(state_mutex_);
+    current_navigation_state_ = std::make_tuple(p_0, v_0, T_0);
+  }
 }
 
 void EKF::start() {

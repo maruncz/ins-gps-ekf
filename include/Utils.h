@@ -14,11 +14,11 @@ class Utils {
  public:
   static inline double Rm(double phi) {
     return (Re * (1 - e2) /
-        std::pow(1 - e2 * std::pow(std::sin(phi), 2), 3 / 2));
+        std::pow(1 - e2 * std::pow(std::sin(phi), 2), 1.5));
   }
 
   static inline double Rn(double phi) {
-    return (Re / std::pow(1 - e2 * std::pow(std::sin(phi), 2), 1 / 2));
+    return (Re / std::sqrt(1 - e2 * std::pow(std::sin(phi), 2)));
   }
 
   static void toSkewSymmetricMatrix(Eigen::Matrix3d &M, Eigen::Vector3d &v) {
@@ -64,12 +64,12 @@ class Utils {
   }
 
   template<class T>
-  static T calcMeanVector(std::vector<T> measurments) {
+  static T calcMeanVector(const std::vector<T> &measurements) {
     T mean;
     mean.setZero();
-    for (int n = 0; n < measurments.size(); ++n) {
+    for (int n = 0; n < measurements.size(); ++n) {
       for (int i = 0; i < mean.rows(); ++i) {
-        mean(i) = mean(i) + 1 / (n + 1) * (measurments.at(n)(i) - mean(i));
+        mean(i) = mean(i) + 1.0 / (n + 1) * (measurements.at(n)(i) - mean(i));
       }
     }
     return mean;
@@ -77,7 +77,7 @@ class Utils {
 
   static constexpr double Re = 6378.137E3; // Earth semi-major axis [m]
   static constexpr double e = 0.081819;    // Earth eccentricity
-  static constexpr double e2 = std::pow(e, 2);
+  static constexpr double e2 = e * e;
   static constexpr double omega_ei = 7.292E-05; // Earth turn rate [rad/s]
   static constexpr double g = 9.80665;          // Gravity of Earth [m/s^2]
 
