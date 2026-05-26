@@ -8,14 +8,8 @@ namespace EKF_INS {
 ErrorState::ErrorState(std::shared_ptr<EKF_INS::NavigationState> navigation_state_ptr, bool use_azimuth_alignment)
     : navigation_state_ptr_(navigation_state_ptr),
       use_azimuth_alignment_(use_azimuth_alignment),
-      gen_(rd_()),
-      dis_(-1.0, 1.0),
       delta_x_(15),
-      F_(15, 15),
-      omega_a_max_(0.0),
-      omega_g_max_(0.0),
-      omega_a_gm_max_(0.1),
-      omega_g_gm_max_(0.001) {
+      F_(15, 15) {
   resetErrorState();
 }
 
@@ -35,10 +29,10 @@ void ErrorState::updateStateWithMeasurements(Eigen::Vector3d f_bi_b, Eigen::Vect
   }
 
   delta_p_dot_n_ = Frr() * delta_p_n_ + Frv() * delta_v_n_ + Fre() * epsilon_n_;
-  delta_v_dot_n_ = Fvr() * delta_p_n_ + Fvv() * delta_v_n_ + Fve() * epsilon_n_ + T_bn_ * b_a_ + T_bn_ * omega_a();
-  epsilon_dot_n_ = Fer() * delta_p_n_ + Fev() * delta_v_n_ + Fee() * epsilon_n_ + T_bn_ * b_g_ + T_bn_ * omega_g();
-  b_dot_a_ = Fa() * b_a_ + omega_a_gm();
-  b_dot_g_ = Fg() * b_g_ + omega_g_gm();
+  delta_v_dot_n_ = Fvr() * delta_p_n_ + Fvv() * delta_v_n_ + Fve() * epsilon_n_ + T_bn_ * b_a_;
+  epsilon_dot_n_ = Fer() * delta_p_n_ + Fev() * delta_v_n_ + Fee() * epsilon_n_ + T_bn_ * b_g_;
+  b_dot_a_ = Fa() * b_a_;
+  b_dot_g_ = Fg() * b_g_;
 }
 
 void ErrorState::integrateState(double dt) {
@@ -161,30 +155,6 @@ Eigen::Matrix3d ErrorState::Fee() {
 Eigen::Matrix3d ErrorState::Fa() { return Eigen::Matrix3d::Zero(); }
 
 Eigen::Matrix3d ErrorState::Fg() { return Eigen::Matrix3d::Zero(); }
-
-Eigen::Vector3d ErrorState::omega_a() {
-  Eigen::Vector3d omega_a_(dis_(gen_), dis_(gen_), dis_(gen_));
-
-  return omega_a_max_ * omega_a_;
-}
-
-Eigen::Vector3d ErrorState::omega_g() {
-  Eigen::Vector3d omega_g_(dis_(gen_), dis_(gen_), dis_(gen_));
-
-  return omega_g_max_ * omega_g_;
-}
-
-Eigen::Vector3d ErrorState::omega_a_gm() {
-  Eigen::Vector3d omega_a_gm_(dis_(gen_), dis_(gen_), dis_(gen_));
-
-  return omega_a_gm_max_ * omega_a_gm_;
-}
-
-Eigen::Vector3d ErrorState::omega_g_gm() {
-  Eigen::Vector3d omega_g_gm_(dis_(gen_), dis_(gen_), dis_(gen_));
-
-  return omega_g_gm_max_ * omega_g_gm_;
-}
 
 void ErrorState::getNavigationState() {
   auto fullState = navigation_state_ptr_->getState();

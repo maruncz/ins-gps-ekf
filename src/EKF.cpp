@@ -130,18 +130,23 @@ void EKF::updateWithGPSMeasurements(std::vector<Eigen::Matrix<double, 6, 1>> gps
   std::get<0>(fixed_navigation_state_) = std::get<0>(ins_navigation_state_) - fixed_error_state_.segment<3>(0);
   // Velocity correction
   std::get<1>(fixed_navigation_state_) = std::get<1>(ins_navigation_state_) - fixed_error_state_.segment<3>(3);
-  // Orientation correction
   Eigen::Vector3d epsilon_n = fixed_error_state_.segment<3>(6);
   if (is_vel_higher_than_threshold && use_azimuth_alignment_) {
     epsilon_n(2) = z_heading_;
-    Eigen::Vector3d ins_navigation_euler_angles = EKF_INS::Utils::toEulerAngles(std::get<2>(ins_navigation_state_));
-    std::get<2>(fixed_navigation_state_) = EKF_INS::Utils::toRotationMatrix(ins_navigation_euler_angles - epsilon_n);
   }
-  else {
-    Eigen::Matrix3d E_n;
-    Utils::toSkewSymmetricMatrix(E_n, epsilon_n);
-    std::get<2>(fixed_navigation_state_) = (Eigen::Matrix3d::Identity() - E_n) * std::get<2>(ins_navigation_state_);
+  Eigen::Matrix3d E_n;
+  Utils::toSkewSymmetricMatrix(E_n, epsilon_n);
+  double theta = epsilon_n.norm();
+  Eigen::Matrix3d R_correction;
+  if (theta < 1e-12) {
+    R_correction = Eigen::Matrix3d::Identity() - E_n;
+  } else {
+    // exp(-[ε×]) = I - sin(θ)/θ·[ε×] + (1-cos(θ))/θ²·[ε×]²
+    double st = std::sin(theta) / theta;
+    double ct = (1.0 - std::cos(theta)) / (theta * theta);
+    R_correction = Eigen::Matrix3d::Identity() - st * E_n + ct * (E_n * E_n);
   }
+  std::get<2>(fixed_navigation_state_) = R_correction * std::get<2>(ins_navigation_state_);
 
   logger_->debug("updateWithGPSMeasurements - error_state: \n{}", fixed_error_state_.transpose());
 
@@ -206,6 +211,10 @@ void EKF::setQMatrix(const Eigen::MatrixXd &Q) {
 }
 
 void EKF::setRMatrix(const Eigen::MatrixXd &R) { R_ = R; }
+
+void EKF::setInitialCovariance(const Eigen::MatrixXd &P0) {
+  tracker_->error_state_covariance_ptr_->setPMatrix(P0);
+}
 
 void EKF::setForcedDt(double dt_s) { tracker_->setForcedDt(dt_s); }
 

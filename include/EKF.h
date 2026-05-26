@@ -25,6 +25,7 @@ class EKF {
   double getAzimuth();
   void setQMatrix(const Eigen::MatrixXd &Q);
   void setRMatrix(const Eigen::MatrixXd &R);
+  void setInitialCovariance(const Eigen::MatrixXd &P0);
   void setForcedDt(double dt_s);
   void setCovarianceDt(double dt_s);
   void setVelocityThreshold(double v) { velocity_threshold_ = v; }

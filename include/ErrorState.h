@@ -7,7 +7,6 @@
 
 #include "Core.h"
 #include "NavigationState.h"
-#include <random>
 
 namespace EKF_INS {
 class ErrorState {
@@ -17,10 +16,6 @@ class ErrorState {
   void updateStateWithMeasurements(Eigen::Vector3d f_bi_b, Eigen::Vector3d omega_bi_b);
   void integrateState(double dt);
   void resetErrorState();
-  void setOmegaA(double omega_a_max) { omega_a_max_ = omega_a_max; }
-  void setOmegaG(double omega_g_max) { omega_g_max_ = omega_g_max; }
-  void setOmegaAgm(double omega_a_gm_max) { omega_a_gm_max_ = omega_a_gm_max; }
-  void setOmegaGgm(double omega_g_gm_max) { omega_g_gm_max_ = omega_g_gm_max; }
   Eigen::MatrixXd getTransitionMatrix(double dt);
 
  private:
@@ -35,10 +30,6 @@ class ErrorState {
   Eigen::Matrix3d Fee();
   Eigen::Matrix3d Fa();
   Eigen::Matrix3d Fg();
-  Eigen::Vector3d omega_a();
-  Eigen::Vector3d omega_g();
-  Eigen::Vector3d omega_a_gm();
-  Eigen::Vector3d omega_g_gm();
   Eigen::MatrixXd F();
   void getNavigationState();
 
@@ -54,11 +45,6 @@ class ErrorState {
   Eigen::Matrix3d T_bn_;
   Eigen::Vector3d f_bi_b_, omega_bi_b_;
   std::shared_ptr<EKF_INS::NavigationState> navigation_state_ptr_;
-
-  std::random_device rd_;
-  std::mt19937 gen_;
-  std::uniform_real_distribution<double> dis_;
-  double omega_a_max_, omega_g_max_, omega_a_gm_max_, omega_g_gm_max_;
 
   const bool use_azimuth_alignment_;
   const double acceleration_threshold_ = 0.2;
