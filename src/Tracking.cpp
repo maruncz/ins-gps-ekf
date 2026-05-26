@@ -60,8 +60,14 @@ void Tracking::checkAndUpdate() {
   }
 }
 
+void Tracking::setForcedDt(double dt_s) { forced_dt_ = dt_s; }
+
 void Tracking::updateDT() {
-  dt_ = std::chrono::high_resolution_clock::now() - clock_;
+  if (forced_dt_ > 0.0) {
+    dt_ = std::chrono::duration<double>(forced_dt_);
+  } else {
+    dt_ = std::chrono::high_resolution_clock::now() - clock_;
+  }
 }
 
 void Tracking::setQMatrix(const Eigen::MatrixXd &Q) {

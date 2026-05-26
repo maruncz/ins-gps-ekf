@@ -207,6 +207,8 @@ void EKF::setQMatrix(const Eigen::MatrixXd &Q) {
 
 void EKF::setRMatrix(const Eigen::MatrixXd &R) { R_ = R; }
 
+void EKF::setForcedDt(double dt_s) { tracker_->setForcedDt(dt_s); }
+
 void EKF::setInitialState(Eigen::Vector3d p_0, Eigen::Vector3d v_0, Eigen::Matrix3d T_0) {
   tracker_->setNavigationInitialState(p_0, v_0, T_0);
   {
