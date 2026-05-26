@@ -35,8 +35,9 @@ public:
   void resetClock();
   void setQMatrix(const Eigen::MatrixXd &Q);
   void setForcedDt(double dt_s);
+  void setCovarianceDt(double dt_s);
 
-private:
+ private:
   void updateTrackingWithMeasurements(Eigen::Vector3d f_bi_b, Eigen::Vector3d omega_bi_b);
   void checkAndUpdate();
   void updateDT();
@@ -52,6 +53,7 @@ private:
   std::shared_ptr<spdlog::logger> logger_;
 
   double forced_dt_ = -1.0;
+  double covariance_dt_ = -1.0;
   const bool use_azimuth_alignment_;
 };
 } // namespace EKF_INS

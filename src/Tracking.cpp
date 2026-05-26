@@ -35,7 +35,8 @@ void Tracking::updateTrackingWithMeasurements(Eigen::Vector3d f_bi_b,
   navigation_state_ptr_->integrateState(dt_.count());
   error_state_ptr_->updateStateWithMeasurements(f_bi_b, omega_bi_b);
   error_state_ptr_->integrateState(dt_.count());
-  error_state_covariance_ptr_->updateCovarianceMatrix(dt_.count());
+  double cov_dt = (covariance_dt_ > 0.0) ? covariance_dt_ : dt_.count();
+  error_state_covariance_ptr_->updateCovarianceMatrix(cov_dt);
 }
 
 void Tracking::setNavigationInitialState(const Eigen::Vector3d p,
@@ -61,6 +62,8 @@ void Tracking::checkAndUpdate() {
 }
 
 void Tracking::setForcedDt(double dt_s) { forced_dt_ = dt_s; }
+
+void Tracking::setCovarianceDt(double dt_s) { covariance_dt_ = dt_s; }
 
 void Tracking::updateDT() {
   if (forced_dt_ > 0.0) {

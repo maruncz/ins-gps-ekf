@@ -20,7 +20,7 @@ void ErrorStateCovariance::setQMatrix(const Eigen::MatrixXd &Q) { Q_ = Q; }
 
 void ErrorStateCovariance::updateCovarianceMatrix(double dt) {
   Eigen::MatrixXd phi = error_state_ptr_->getTransitionMatrix(dt);
-  P_ = phi * P_ * phi.transpose() + Q_;
+  P_ = phi * P_ * phi.transpose() + Q_ * dt;
 }
 
 Eigen::MatrixXd ErrorStateCovariance::getErrorStateCovariance() { return P_; }

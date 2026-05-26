@@ -111,7 +111,7 @@ void EKF::updateWithGPSMeasurements(std::vector<Eigen::Matrix<double, 6, 1>> gps
   // Chi-square innovation gating: reject GPS measurements with excessive innovation
   {
     double mahalanobis_sq = z.transpose() * S.llt().solve(z);
-    constexpr double chi_sq_threshold_6dof = 150.0;  // 5σ, 6-DOF
+    constexpr double chi_sq_threshold_6dof = 18.0;  // χ²(6) ~99.7% (3σ)
     if (mahalanobis_sq > chi_sq_threshold_6dof) {
       logger_->warn("GPS innovation rejected: d²={:.1f} > threshold={:.1f}",
                     mahalanobis_sq, chi_sq_threshold_6dof);
@@ -208,6 +208,8 @@ void EKF::setQMatrix(const Eigen::MatrixXd &Q) {
 void EKF::setRMatrix(const Eigen::MatrixXd &R) { R_ = R; }
 
 void EKF::setForcedDt(double dt_s) { tracker_->setForcedDt(dt_s); }
+
+void EKF::setCovarianceDt(double dt_s) { tracker_->setCovarianceDt(dt_s); }
 
 void EKF::setInitialState(Eigen::Vector3d p_0, Eigen::Vector3d v_0, Eigen::Matrix3d T_0) {
   tracker_->setNavigationInitialState(p_0, v_0, T_0);

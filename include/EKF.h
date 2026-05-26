@@ -26,6 +26,7 @@ class EKF {
   void setQMatrix(const Eigen::MatrixXd &Q);
   void setRMatrix(const Eigen::MatrixXd &R);
   void setForcedDt(double dt_s);
+  void setCovarianceDt(double dt_s);
   void setVelocityThreshold(double v) { velocity_threshold_ = v; }
   void setInitialState(Eigen::Vector3d p_0, Eigen::Vector3d v_0, Eigen::Matrix3d T_0);
   void start();
