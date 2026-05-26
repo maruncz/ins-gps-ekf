@@ -34,7 +34,8 @@ EKF::EKF() : Q_(15, 15), R_(6, 6), H_(6, 15), is_running_(false), use_azimuth_al
 
   // Initializing default R matrix
   Eigen::VectorXd r_diag(6);
-  r_diag << 0.000001, 0.000001, 0.5, 0.000001, 0.000001, 0.5;
+  r_diag << 2.0e-9, 2.0e-9, 64.0,    // position: lat(rad²) σ=5m, lon(rad²) σ=5m, alt(m²) σ=8m
+             0.09,   0.09,   0.25;    // velocity: vN(m/s)² σ=0.3, vE(m/s)² σ=0.3, vD(m/s)² σ=0.5
   R_ = r_diag.asDiagonal();
 
   H_.setZero();
@@ -106,6 +107,18 @@ void EKF::updateWithGPSMeasurements(std::vector<Eigen::Matrix<double, 6, 1>> gps
   Eigen::MatrixXd P = ins_error_state_covariance_;
   logger_->debug("EKF::updateWithGPSMeasurements - ins_error_state_covariance:\n{}", ins_error_state_covariance_);
   Eigen::MatrixXd S = H_ * P * H_.transpose() + R_;
+
+  // Chi-square innovation gating: reject GPS measurements with excessive innovation
+  {
+    double mahalanobis_sq = z.transpose() * S.llt().solve(z);
+    constexpr double chi_sq_threshold_6dof = 150.0;  // 5σ, 6-DOF
+    if (mahalanobis_sq > chi_sq_threshold_6dof) {
+      logger_->warn("GPS innovation rejected: d²={:.1f} > threshold={:.1f}",
+                    mahalanobis_sq, chi_sq_threshold_6dof);
+      return;  // skip measurement entirely — do not apply correction
+    }
+  }
+
   Eigen::MatrixXd K = P * H_.transpose() * S.inverse();
   logger_->debug("EKF::updateWithGPSMeasurements - K:\n{}", K);
 
