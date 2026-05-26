@@ -25,7 +25,7 @@ void ErrorStateCovariance::updateCovarianceMatrix(double dt) {
 
 Eigen::MatrixXd ErrorStateCovariance::getErrorStateCovariance() { return P_; }
 
-void ErrorStateCovariance::resetPMatrix() {
-  P_.setZero();
+void ErrorStateCovariance::setPMatrix(const Eigen::MatrixXd &P) {
+  P_ = P;
 }
 } // namespace EKF_INS

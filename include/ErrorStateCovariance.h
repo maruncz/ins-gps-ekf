@@ -16,7 +16,7 @@ class ErrorStateCovariance {
   void setQMatrix(const Eigen::MatrixXd &Q);
   void updateCovarianceMatrix(double dt);
   Eigen::MatrixXd getErrorStateCovariance();
-  void resetPMatrix();
+  void setPMatrix(const Eigen::MatrixXd &P);
 
  private:
   Eigen::MatrixXd Q_;

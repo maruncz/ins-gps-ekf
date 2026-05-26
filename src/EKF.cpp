@@ -137,7 +137,7 @@ void EKF::updateWithGPSMeasurements(std::vector<Eigen::Matrix<double, 6, 1>> gps
   tracker_->navigation_state_ptr_->setState(std::get<0>(fixed_navigation_state_),
                                             std::get<1>(fixed_navigation_state_),
                                             std::get<2>(fixed_navigation_state_));
-  tracker_->error_state_covariance_ptr_->resetPMatrix();
+  tracker_->error_state_covariance_ptr_->setPMatrix(fixed_error_state_covariance_);
   logger_->info("updateWithGPSMeasurements - p_n: {} v_n: {} T_n: {}",
                 std::get<0>(fixed_navigation_state_).transpose(),
                 std::get<1>(fixed_navigation_state_).transpose(),
